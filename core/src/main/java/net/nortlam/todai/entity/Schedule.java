@@ -34,6 +34,12 @@ public class Schedule implements Serializable {
     
     public static final String TAG_NAME = "name";
     private String name;
+    
+    public static final String TAG_CRON_EXPRESSION = "cronExpression";
+    private String cronExpression;
+    
+    public static final String TAG_DELETE_ON_SUCCESSFUL = "deleteOnsucessful";
+    private boolean deleteOnsuccessful;
 
     public Schedule() {
     }

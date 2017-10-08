@@ -2,6 +2,7 @@ package net.nortlam.todai.core.setup;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import com.mongodb.MongoSocketException;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 import java.util.Arrays;
@@ -55,9 +56,14 @@ public class MongoProvider {
             }
         }
         
-        LOG.log(Level.INFO, ">>> init() Connecting to Database");
-        ServerAddress mongoAddress = new ServerAddress(mongoHost, mongoPort);
-        client = new MongoClient(mongoAddress, Arrays.asList(credential()));
+        try {
+            LOG.log(Level.INFO, ">>> init() Connecting to Database Host:{0} Port:{1}",
+                    new Object[] {mongoHost, mongoPort});
+            ServerAddress mongoAddress = new ServerAddress(mongoHost, mongoPort);
+            client = new MongoClient(mongoAddress, Arrays.asList(credential()));
+        } catch(MongoSocketException ex) {
+            LOG.log(Level.SEVERE, "### MONGO SOCKET EXCEPTION:{0}", ex.getMessage());
+        }
     }
     
     /**
@@ -77,13 +83,15 @@ public class MongoProvider {
             password = DEFAULT_PASSWORD;
         }
         
-        String database = System.getenv("TODAI_DATABASE");
+        database = System.getenv("TODAI_DATABASE");
         if(database == null) {
             LOG.log(Level.WARNING, "### MongoDB's Database was not set. "
-                    + "Assming default value: {0}", DEFAULT_MONGODB_DATABASE);
+                    + "Assuming default value: {0}", DEFAULT_MONGODB_DATABASE);
             database = DEFAULT_MONGODB_DATABASE;
         }
         
+        LOG.log(Level.INFO, ">>> credential() Username:{0} Password:{1} Database:{2}",
+                new Object[] {username, password, database});
         return MongoCredential.createCredential(username, database, 
                                                         password.toCharArray());
     }

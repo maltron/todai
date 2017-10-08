@@ -42,9 +42,9 @@ import org.bson.Document;
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
 @Path("/v1/schedule")
-public class Resource {
+public class ResourceSchedule {
 
-    private static final Logger LOG = Logger.getLogger(Resource.class.getName());
+    private static final Logger LOG = Logger.getLogger(ResourceSchedule.class.getName());
     
     private static final SimpleDateFormat DATE_FORMAT =
                         new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -55,7 +55,7 @@ public class Resource {
     @Context
     private ServletContext context;
 
-    public Resource() {
+    public ResourceSchedule() {
     }
     
     @GET
