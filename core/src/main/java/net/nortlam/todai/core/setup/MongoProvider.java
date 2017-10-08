@@ -5,6 +5,8 @@ import com.mongodb.MongoCredential;
 import com.mongodb.MongoSocketException;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +16,8 @@ import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import net.nortlam.todai.api.ServiceSchedule;
+import net.nortlam.todai.entity.Schedule;
 
 @Singleton
 @ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
@@ -64,6 +68,13 @@ public class MongoProvider {
         } catch(MongoSocketException ex) {
             LOG.log(Level.SEVERE, "### MONGO SOCKET EXCEPTION:{0}", ex.getMessage());
         }
+        
+        // Once connected, create some importante indexes for some Collections
+        LOG.log(Level.FINE, ">>> init() Creating Indexes on Collection Schedule: Name");
+        client.getDatabase(database)
+                .getCollection(ServiceSchedule.COLLECTION_NAME)
+                .createIndex(Indexes.ascending(Schedule.TAG_NAME), 
+                                                new IndexOptions().unique(true));
     }
     
     /**

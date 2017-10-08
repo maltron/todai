@@ -50,7 +50,7 @@ public class ResourceSchedule {
                         new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     
     @EJB
-    private Service service;
+    private ServiceSchedule service;
     
     @Context
     private ServletContext context;

@@ -35,16 +35,16 @@ import org.bson.Document;
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
 @Stateless
-public class Service implements Serializable {
+public class ServiceSchedule implements Serializable {
 
-    private static final Logger LOG = Logger.getLogger(Service.class.getName());
+    private static final Logger LOG = Logger.getLogger(ServiceSchedule.class.getName());
     
     public static final String COLLECTION_NAME = "schedule";
     
     @EJB
     private MongoProvider provider;
 
-    public Service() {
+    public ServiceSchedule() {
     }
     
     /**
