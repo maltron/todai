@@ -15,7 +15,7 @@
  * limitations under the License.
  * 
  */
-package net.nortlam.todai.core;
+package net.nortlam.todai.core.setup;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

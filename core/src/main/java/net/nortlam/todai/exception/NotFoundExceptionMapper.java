@@ -15,16 +15,27 @@
  * limitations under the License.
  * 
  */
-package net.nortlam.todai.core.setup;
+package net.nortlam.todai.exception;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
 /**
- * Enable JAX-RS REST Capabilities
- * 
+ * Unable to found a information
+ * @return: Code 404: NOT FOUND
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
-@ApplicationPath("/api")
-public class RESTEnabled extends Application {
+@Provider
+public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException> {
+
+    private static final Logger LOG = Logger.getLogger(NotFoundExceptionMapper.class.getName());
+
+    @Override
+    public Response toResponse(NotFoundException ex) {
+        LOG.log(Level.FINE, "### NOT FOUND EXCEPTION:{0}", ex.getMessage());
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
 }

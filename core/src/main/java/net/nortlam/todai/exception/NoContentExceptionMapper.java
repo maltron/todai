@@ -15,16 +15,27 @@
  * limitations under the License.
  * 
  */
-package net.nortlam.todai.core.setup;
+package net.nortlam.todai.exception;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
 /**
- * Enable JAX-RS REST Capabilities
- * 
+ * No Content was found
+ * @return: Code: 204 NO CONTENT
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
-@ApplicationPath("/api")
-public class RESTEnabled extends Application {
+@Provider
+public class NoContentExceptionMapper implements ExceptionMapper<NoContentException> {
+
+    private static final Logger LOG = Logger.getLogger(NoContentExceptionMapper.class.getName());
+
+    @Override
+    public Response toResponse(NoContentException ex) {
+        LOG.log(Level.WARNING, "### NO CONTENT EXCEPTION:{0}", ex.getMessage());
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
 }

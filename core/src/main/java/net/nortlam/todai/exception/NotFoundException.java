@@ -15,16 +15,31 @@
  * limitations under the License.
  * 
  */
-package net.nortlam.todai.core.setup;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+package net.nortlam.todai.exception;
 
 /**
- * Enable JAX-RS REST Capabilities
- * 
- * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
+ *
+ * @author mauricio
  */
-@ApplicationPath("/api")
-public class RESTEnabled extends Application {
+public class NotFoundException extends Exception {
+
+    public NotFoundException() {
+        super();
+    }
+
+    public NotFoundException(String message) {
+        super(message);
+    }
+
+    public NotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public NotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    public NotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

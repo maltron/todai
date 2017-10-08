@@ -17,26 +17,34 @@
  */
 package net.nortlam.todai.exception;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
 /**
- * NotExistException JAX-RS Mapper
- * @return Code 404: Resource doesn't exist
+ * Indicate the data already exists in the Database 
  * 
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
-@Provider
-public class NotExistExceptionMapper implements ExceptionMapper<NotExistException> {
+public class AlreadyExistsException extends Exception {
 
-    private static final Logger LOG = Logger.getLogger(NotExistExceptionMapper.class.getName());
+    private static final Logger LOG = Logger.getLogger(AlreadyExistsException.class.getName());
 
-    @Override
-    public Response toResponse(NotExistException ex) {
-        LOG.log(Level.WARNING, "### NOT EXIST EXCEPTION:{0}", ex.getMessage());
-        return Response.status(Response.Status.NOT_FOUND).build();
+    public AlreadyExistsException() {
+        super();
+    }
+
+    public AlreadyExistsException(String message) {
+        super(message);
+    }
+
+    public AlreadyExistsException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public AlreadyExistsException(Throwable cause) {
+        super(cause);
+    }
+
+    public AlreadyExistsException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

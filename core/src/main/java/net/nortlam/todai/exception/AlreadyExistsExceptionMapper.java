@@ -24,19 +24,18 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 /**
- * NotExistException JAX-RS Mapper
- * @return Code 404: Resource doesn't exist
- * 
+ * Indicate that some data was already found in the Database
+ * @return: Code 409: CONFLICT
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
 @Provider
-public class NotExistExceptionMapper implements ExceptionMapper<NotExistException> {
+public class AlreadyExistsExceptionMapper implements ExceptionMapper<AlreadyExistsException> {
 
-    private static final Logger LOG = Logger.getLogger(NotExistExceptionMapper.class.getName());
+    private static final Logger LOG = Logger.getLogger(AlreadyExistsExceptionMapper.class.getName());
 
     @Override
-    public Response toResponse(NotExistException ex) {
-        LOG.log(Level.WARNING, "### NOT EXIST EXCEPTION:{0}", ex.getMessage());
-        return Response.status(Response.Status.NOT_FOUND).build();
+    public Response toResponse(AlreadyExistsException ex) {
+        LOG.log(Level.WARNING, "### ALREADY EXISTS EXCEPTION:{0}", ex.getMessage());
+        return Response.status(Response.Status.CONFLICT).build();
     }
 }

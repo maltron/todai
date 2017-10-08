@@ -15,21 +15,65 @@
  * limitations under the License.
  * 
  */
-
 package net.nortlam.todai.api;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import java.io.Serializable;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import net.nortlam.todai.core.setup.MongoProvider;
+import net.nortlam.todai.entity.Schedule;
+import net.nortlam.todai.exception.AlreadyExistsException;
+import net.nortlam.todai.exception.NotFoundException;
+import org.bson.Document;
 
 /**
- *
+ * A ser of services necessary to validate information on API's call
+ * 
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
+@Stateless
 public class Service implements Serializable {
 
     private static final Logger LOG = Logger.getLogger(Service.class.getName());
+    
+    public static final String COLLECTION_NAME = "schedule";
+    
+    @EJB
+    private MongoProvider provider;
 
     public Service() {
     }
-
+    
+    /**
+     * Returns a Collection of the entire Database */
+    public MongoCollection<Document> getEntries() {
+        return getCollection();
+    }
+    
+    public Document findByName(String name) throws NotFoundException {
+        Document document = getCollection().find(Filters.eq(
+                                                Schedule.TAG_NAME, name)).first();
+        if(document == null) throw new NotFoundException("Schedule "+name+
+                                                                    " was not found");
+        
+        return document;
+    }
+    
+    /**
+     * Check if this name already exist */
+    public boolean alreadyExistsName(String name) throws AlreadyExistsException {
+        Document document = getCollection().find(Filters.eq(Schedule.TAG_NAME, name)).first();
+        if(document != null) throw new AlreadyExistsException(name+" already exists");
+        
+        return false;
+    }
+    
+    /**
+     * Return a instance of the collection */
+    private MongoCollection<Document> getCollection() {
+        return provider.getDatabase().getCollection(COLLECTION_NAME);
+    }
 }

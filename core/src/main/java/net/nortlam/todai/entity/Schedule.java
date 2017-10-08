@@ -15,31 +15,27 @@
  * limitations under the License.
  * 
  */
+package net.nortlam.todai.entity;
 
-package net.nortlam.todai.api;
-
-import java.util.logging.Level;
+import java.io.Serializable;
 import java.util.logging.Logger;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.bson.types.ObjectId;
 
 /**
- *
+ * This is the most basic information that it will be stored into the Database
+ * 
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
-public class TestJob implements Job {
+public class Schedule implements Serializable {
 
-    private static final Logger LOG = Logger.getLogger(TestJob.class.getName());
-
-    public TestJob() {
-    }
-
-    @Override
-    public void execute(JobExecutionContext jec) throws JobExecutionException {
-        LOG.log(Level.INFO, ">>> TestJob.execute()");
-    }
+    private static final Logger LOG = Logger.getLogger(Schedule.class.getName());
     
+    private ObjectId objectID;
     
+    public static final String TAG_NAME = "name";
+    private String name;
+
+    public Schedule() {
+    }
 
 }

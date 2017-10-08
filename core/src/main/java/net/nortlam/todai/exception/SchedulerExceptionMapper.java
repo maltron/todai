@@ -22,18 +22,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 import org.quartz.SchedulerException;
 
 /**
- *
+ * Some problems occur during handling Quartz's Scheduling API
+ * @return: Code: 500 ????
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
+@Provider
 public class SchedulerExceptionMapper implements ExceptionMapper<SchedulerException> {
 
     private static final Logger LOG = Logger.getLogger(SchedulerExceptionMapper.class.getName());
-
-    public SchedulerExceptionMapper() {
-    }
 
     @Override
     public Response toResponse(SchedulerException ex) {
