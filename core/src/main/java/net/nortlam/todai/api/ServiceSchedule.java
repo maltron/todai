@@ -20,12 +20,15 @@ package net.nortlam.todai.api;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import net.nortlam.todai.core.setup.MongoProvider;
 import net.nortlam.todai.entity.Schedule;
 import net.nortlam.todai.exception.AlreadyExistsException;
+import net.nortlam.todai.exception.NoContentException;
 import net.nortlam.todai.exception.NotFoundException;
 import org.bson.Document;
 
@@ -48,27 +51,31 @@ public class ServiceSchedule implements Serializable {
     }
     
     /**
-     * Returns a Collection of the entire Database */
-    public MongoCollection<Document> getEntries() {
-        return getCollection();
+     * Return a list of all Schedules available in the database */
+    public Collection<Schedule> fetchAll() throws NoContentException {
+        Collection<Schedule> result = new ArrayList<>();
+        for(Document document: getCollection().find()) {
+            result.add(new Schedule(document));
+        }
+        
+        if(result.isEmpty()) throw new NoContentException();
+        
+        return result;
     }
     
-    public Document findByName(String name) throws NotFoundException {
+    public Schedule findByName(String name) throws NotFoundException {
         Document document = getCollection().find(Filters.eq(
                                                 Schedule.TAG_NAME, name)).first();
-        if(document == null) throw new NotFoundException("Schedule "+name+
-                                                                    " was not found");
-        
-        return document;
+        if(document == null) throw new NotFoundException("Schedule "+name+" was not found");
+        return new Schedule(document);
     }
-    
+
     /**
-     * Check if this name already exist */
-    public boolean alreadyExistsName(String name) throws AlreadyExistsException {
-        Document document = getCollection().find(Filters.eq(Schedule.TAG_NAME, name)).first();
-        if(document != null) throw new AlreadyExistsException(name+" already exists");
-        
-        return false;
+     * Check if this name already exists in the Database */
+    public boolean alreadyExist(String name) {
+        Document document = getCollection().find(
+                                    Filters.eq(Schedule.TAG_NAME, name)).first();
+        return document != null;
     }
     
     /**

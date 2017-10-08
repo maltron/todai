@@ -19,8 +19,8 @@ package net.nortlam.todai.api;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.servlet.ServletContext;
@@ -28,13 +28,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import net.nortlam.todai.entity.Schedule;
+import net.nortlam.todai.exception.NoContentException;
 import net.nortlam.todai.exception.NotFoundException;
-import org.bson.Document;
 
 /**
  * Add some Scheduling Time
@@ -59,32 +59,21 @@ public class ResourceSchedule {
     }
     
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response findAll() throws NoContentException {
+        GenericEntity<Collection<Schedule>> all = 
+                    new GenericEntity<Collection<Schedule>>(service.fetchAll()){};
+        return Response.ok(all, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
     @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response findByName(@PathParam("name") String name) throws NotFoundException {
-        Document document = service.findByName(name);
-        return Response.ok(document, MediaType.APPLICATION_JSON).build();
+        Schedule schedule = service.findByName(name);
+        return Response.ok(schedule, MediaType.APPLICATION_JSON).build();
     }
     
-    @GET
-    @Path("/test")
-    public Response test() {
-        LOG.log(Level.INFO, ">>> Resource.test()");
-        return Response.ok().build();
-    }
-    
-    @GET
-    @Path("/client")
-    public Response testClient() {
-        Client client = ClientBuilder.newClient();
-        return Response.ok().build();
-    }
-    
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response fetchAll() {
-        return Response.ok(service.getEntries(), MediaType.APPLICATION_JSON).build();
-    }
     
 //    /**
 //     * Doing a small test into creating something into Scheduler */
