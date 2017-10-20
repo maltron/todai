@@ -15,29 +15,30 @@
  * limitations under the License.
  * 
  */
+package net.nortlam.todai.other;
 
-package net.nortlam.todai.exception;
-
-import java.util.logging.Level;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Logger;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-import org.quartz.SchedulerException;
 
 /**
- * Some problems occur during handling Quartz's Scheduling API
- * @return: Code: 400 BAD REQUEST
+ * Some utilities methods to help
+ * 
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
-@Provider
-public class SchedulerExceptionMapper implements ExceptionMapper<SchedulerException> {
+public class Utility implements Serializable {
 
-    private static final Logger LOG = Logger.getLogger(SchedulerExceptionMapper.class.getName());
-
-    @Override
-    public Response toResponse(SchedulerException ex) {
-        LOG.log(Level.WARNING, "### SCHEDULER EXCEPTION: {0}", ex.getMessage());
-        return Response.status(Response.Status.BAD_REQUEST).build();
+    private static final Logger LOG = Logger.getLogger(Utility.class.getName());
+    
+    // DEFAULT FORMAT FOR SHOWING DATES
+    public static final SimpleDateFormat DATE_FORMAT = 
+            new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    
+    
+    /**
+     * Returning a easy way to read Dates in a String format */
+    public static String format(Date date) {
+        return DATE_FORMAT.format(date);
     }
 }

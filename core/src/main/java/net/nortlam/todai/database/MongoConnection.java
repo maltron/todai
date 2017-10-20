@@ -1,23 +1,42 @@
-package net.nortlam.todai.core.setup;
+/*
+ * 
+ * Copyright 2014 Mauricio "Maltron" Leal <maltron@gmail.com>
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+package net.nortlam.todai.database;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.MongoSocketException;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
 
-//@Singleton
-//@ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
-public class MongoProvider {
+/**
+ * In charge of connecting to MongoDatabase 
+ * 
+ * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
+ */
+public class MongoConnection implements Serializable {
 
-    private static final Logger LOG = Logger.getLogger(MongoProvider.class.getName());
-    
+    public static final String NAME = "MongoConnection";
+    private static final Logger LOG = Logger.getLogger(MongoConnection.class.getName());
+
     // OpenShift's MongoDB Command:
     // oc new-app mongodb-ephemeral -p MONGODB_DATABASE=todai -p MONGODB_USER=todai -p MONGODB_PASSWORD=todai
     private static final String DEFAULT_USERNAME = "todai";
@@ -25,12 +44,11 @@ public class MongoProvider {
     private static final String DEFAULT_MONGODB_HOST = "mongodb";
     private static final String DEFAULT_MONGODB_DATABASE = "todai";
     private static final int DEFAULT_MONGODB_PORT = 27017;
-    
+
     private String database;
     private MongoClient client;
-    
-    @PostConstruct
-    private void init() {
+
+    public MongoConnection() {
         String mongoHost = System.getenv("MONGODB_HOST");
         if(mongoHost == null) {
             LOG.log(Level.WARNING, "### MongoDB's Host was not set. "
@@ -69,7 +87,7 @@ public class MongoProvider {
 //                .createIndex(Indexes.ascending(Schedule.TAG_NAME), 
 //                                                new IndexOptions().unique(true));
     }
-    
+
     /**
      * Return a Connection information regarding MongoDB's */
     private MongoCredential credential() {
@@ -100,7 +118,6 @@ public class MongoProvider {
                                                         password.toCharArray());
     }
     
-    @Lock(LockType.READ)
     public MongoDatabase getDatabase() {
         return client.getDatabase(database);
     }

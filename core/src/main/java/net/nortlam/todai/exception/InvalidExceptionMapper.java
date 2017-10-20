@@ -15,7 +15,6 @@
  * limitations under the License.
  * 
  */
-
 package net.nortlam.todai.exception;
 
 import java.util.logging.Level;
@@ -23,21 +22,21 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import org.quartz.SchedulerException;
 
 /**
- * Some problems occur during handling Quartz's Scheduling API
- * @return: Code: 400 BAD REQUEST
+ * Invalid Information 
+ * 
+ * @return Code 400: BAD REQUEST
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
 @Provider
-public class SchedulerExceptionMapper implements ExceptionMapper<SchedulerException> {
+public class InvalidExceptionMapper implements ExceptionMapper<InvalidException> {
 
-    private static final Logger LOG = Logger.getLogger(SchedulerExceptionMapper.class.getName());
+    private static final Logger LOG = Logger.getLogger(InvalidExceptionMapper.class.getName());
 
     @Override
-    public Response toResponse(SchedulerException ex) {
-        LOG.log(Level.WARNING, "### SCHEDULER EXCEPTION: {0}", ex.getMessage());
+    public Response toResponse(InvalidException ex) {
+        LOG.log(Level.WARNING, "### INVALID EXCEPTION:{0}", ex.getMessage());
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
 }

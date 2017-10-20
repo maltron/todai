@@ -15,29 +15,27 @@
  * limitations under the License.
  * 
  */
-
 package net.nortlam.todai.exception;
 
+import com.mongodb.MongoWriteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import org.quartz.SchedulerException;
 
 /**
- * Some problems occur during handling Quartz's Scheduling API
- * @return: Code: 400 BAD REQUEST
+ * @return 500: INTERNAL SERVER ERROR: MongoWriteException
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
 @Provider
-public class SchedulerExceptionMapper implements ExceptionMapper<SchedulerException> {
+public class MongoWriteExceptionMapper implements ExceptionMapper<MongoWriteException> {
 
-    private static final Logger LOG = Logger.getLogger(SchedulerExceptionMapper.class.getName());
+    private static final Logger LOG = Logger.getLogger(MongoWriteExceptionMapper.class.getName());
 
     @Override
-    public Response toResponse(SchedulerException ex) {
-        LOG.log(Level.WARNING, "### SCHEDULER EXCEPTION: {0}", ex.getMessage());
-        return Response.status(Response.Status.BAD_REQUEST).build();
+    public Response toResponse(MongoWriteException ex) {
+        LOG.log(Level.FINE, "### MONGO WRITE EXCEPTION:{0}", ex.getMessage());
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 }

@@ -15,35 +15,14 @@
  * limitations under the License.
  * 
  */
-
-package net.nortlam.todai.api;
-
-import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+package net.nortlam.todai.database;
 
 /**
  *
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
-@Path("/test")
-public class Test implements Serializable {
+public interface Connection {
 
-    private static final Logger LOG = Logger.getLogger(Test.class.getName());
-
-    public Test() {
-    }
-    
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response test() {
-        LOG.log(Level.INFO, ">>> Test.test()");
-        return Response.ok("Hello World", MediaType.TEXT_PLAIN).build();
-    }
+    public MongoConnection getMongo();
 
 }

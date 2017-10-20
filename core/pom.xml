@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>net.nortlam.todai</groupId>
+        <artifactId>todai</artifactId>
+        <version>2.0</version>
+    </parent>
 
     <groupId>net.nortlam.todai.core</groupId>
-    <artifactId>core</artifactId>
+    <artifactId>todai-core</artifactId>
     <version>2.0</version>
     <packaging>war</packaging>
 
@@ -15,6 +20,14 @@
     </properties>
     
     <dependencies>
+        <!-- Todai Common Library, which it's going to bring all others
+             dependencies such as: Quartz and Mongo .                     -->
+        <dependency>
+            <groupId>net.nortlam.todai</groupId>
+            <artifactId>todai-common</artifactId>
+            <version>2.0</version> 
+            <scope>compile</scope>
+        </dependency>
         <!-- Basic JavaWeb Dependencies -->
         <dependency>
             <groupId>javax</groupId>
@@ -22,23 +35,6 @@
             <version>7.0</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Quartz Dependencies -->
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz-jobs</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-        <!-- MongoDB for Data Persistent -->
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver</artifactId>
-            <version>3.5.0</version>
-        </dependency>                 
     </dependencies>
 
     <build>

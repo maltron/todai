@@ -15,29 +15,24 @@
  * limitations under the License.
  * 
  */
+package net.nortlam.todai.validation;
 
-package net.nortlam.todai.exception;
-
-import java.util.logging.Level;
+import java.io.Serializable;
 import java.util.logging.Logger;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-import org.quartz.SchedulerException;
+import java.util.regex.Pattern;
 
 /**
- * Some problems occur during handling Quartz's Scheduling API
- * @return: Code: 400 BAD REQUEST
+ * A set of methods in order to validate if a Schedule Entity is valid
+ * 
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
-@Provider
-public class SchedulerExceptionMapper implements ExceptionMapper<SchedulerException> {
+public class ValidateSchedule implements Serializable {
 
-    private static final Logger LOG = Logger.getLogger(SchedulerExceptionMapper.class.getName());
+    private static final Logger LOG = Logger.getLogger(ValidateSchedule.class.getName());
+    
+    private Pattern pattern;
 
-    @Override
-    public Response toResponse(SchedulerException ex) {
-        LOG.log(Level.WARNING, "### SCHEDULER EXCEPTION: {0}", ex.getMessage());
-        return Response.status(Response.Status.BAD_REQUEST).build();
+    public ValidateSchedule() {
     }
+
 }

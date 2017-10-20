@@ -17,17 +17,24 @@
  */
 package net.nortlam.todai.core.setup;
 
+import net.nortlam.todai.database.MongoConnection;
+import java.lang.reflect.Constructor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import net.nortlam.todai.database.Connection;
+import net.nortlam.todai.scheduling.TodaiJob;
+import org.quartz.Job;
 
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.ee.servlet.QuartzInitializerServlet;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.spi.JobFactory;
+import org.quartz.spi.TriggerFiredBundle;
 
 /**
  * Servlet Listener responsible to initiliaze Quartz Factory, which it's going
@@ -35,12 +42,14 @@ import org.quartz.impl.StdSchedulerFactory;
  * 
  * @author Mauricio "Maltron" Leal <maltron at gmail dot com>
  */
-public class QuartzInitializerListener implements ServletContextListener {
+public class QuartzInitializerListener 
+        implements ServletContextListener, JobFactory, Connection {
 
     private static final Logger LOG = Logger.getLogger(QuartzInitializerListener.class.getName());
 
     // Quartz'z Scheduler used to schedule services
     private Scheduler scheduler = null;
+    private MongoConnection mongoConnection;
     
     public QuartzInitializerListener() {
     }
@@ -50,10 +59,17 @@ public class QuartzInitializerListener implements ServletContextListener {
         LOG.log(Level.INFO, ">>> QuartzInitializerListener.contextInitialized() +++++++++++++++++++++");
         ServletContext servletContext = context.getServletContext();
         try {
+            // Create an instance of MongoConnection
+            LOG.log(Level.INFO, ">>> contetInitialized() Creating an instance of MongoConnection");
+            this.mongoConnection = new MongoConnection();
+            servletContext.setAttribute(MongoConnection.NAME, mongoConnection);
+
             // Create the factory and add into ServletContext
             SchedulerFactory factory = new StdSchedulerFactory();
             // Initialize the Scheduler
             scheduler = factory.getScheduler();
+            // It will instance a Job with a MongoConnection in it
+            scheduler.setJobFactory(this); 
             
             LOG.log(Level.FINE, ">>> contextInitialized() Starting Scheduler");
             scheduler.start();
@@ -72,4 +88,34 @@ public class QuartzInitializerListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent context) {
         LOG.log(Level.INFO, ">>> QuartzInitializerListener.contextDestroyed()   ---------------------");
     }
+
+    @Override
+    public MongoConnection getMongo() {
+        return mongoConnection;
+    }
+
+    // JOB FACTORY JOB FACTORY JOB FACTORY JOB FACTORY JOB FACTORY JOB FACTORY 
+    //   JOB FACTORY JOB FACTORY JOB FACTORY JOB FACTORY JOB FACTORY JOB FACTORY 
+    @Override
+    public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
+        Job result = null;
+        try {
+            Class<? extends Job> jobClass = bundle.getJobDetail().getJobClass();
+            if(TodaiJob.class.equals(jobClass)) {
+                Constructor<? extends Job> constructor = (Constructor<? extends Job>)
+                        jobClass.getConstructors()[1];
+                constructor.setAccessible(true);
+                result = constructor.newInstance(this);
+            }
+            
+        } catch(Exception ex) {
+            LOG.log(Level.SEVERE, "### QuartzInitializerServlet.newJob() "
+                    + "EXCEPTION:{0}", ex.getMessage());
+        }
+        
+        return result;
+    }
+    
+    
+    
 }

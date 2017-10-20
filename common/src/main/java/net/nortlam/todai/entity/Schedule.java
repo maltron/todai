@@ -29,6 +29,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.quartz.CronScheduleBuilder;
+
+import static org.quartz.CronScheduleBuilder.cronSchedule;
 
 /**
  * This is the most basic information that it will be stored into the Database
@@ -41,9 +44,9 @@ public class Schedule implements Serializable {
 
     private static final Logger LOG = Logger.getLogger(Schedule.class.getName());
     
-    public static final String TAG_NAME = "name";
-    @XmlElement(name = TAG_NAME, nillable = false, required = true, type = String.class)
-    private String name;
+    public static final String TAG_ID = "_id";
+    @XmlElement(name = TAG_ID, nillable = true, required = false, type = String.class)
+    private String ID;
     
     public static final String TAG_CRON_EXPRESSION = "cronExpression";
     @XmlElement(name = TAG_CRON_EXPRESSION, nillable = false, required = true, type = String.class)
@@ -57,41 +60,67 @@ public class Schedule implements Serializable {
     public static final String TAG_URL = "url";
     @XmlElement(name = TAG_URL, nillable = false, required = true, type = String.class)
     private String url;
+    
+    public static final Status DEFAULT_STATUS = Status.SCHEDULED;
+    public static final String TAG_STATUS = "status";
+    @XmlElement(name = TAG_STATUS, nillable = true, required = false, type = Status.class)
+    private Status status;
+    
+    public static final boolean DEFAULT_IS_LOCK = false;
+    public static final String TAG_IS_LOCK = "isLock";
+    @XmlElement(name = TAG_IS_LOCK, nillable = true, required = false, type = Boolean.class)
+    private boolean isLock;
 
     public Schedule() {
+        this.deleteOnsuccessful = DEFAULT_DELETE_ON_SUCCESSFUL;
+        this.status = DEFAULT_STATUS;
+        this.isLock = DEFAULT_IS_LOCK;
     }
     
     public Schedule(Document document) {
-        this.name = document.getString(TAG_NAME);
-        this.cronExpression = document.getString(TAG_CRON_EXPRESSION);
-        this.deleteOnsuccessful = document.getBoolean(TAG_DELETE_ON_SUCCESSFUL, 
-                                                DEFAULT_DELETE_ON_SUCCESSFUL);
-        this.url = document.getString(TAG_URL);
+        this(document.getString(TAG_CRON_EXPRESSION),
+        document.getString(TAG_URL),
+        document.getBoolean(TAG_DELETE_ON_SUCCESSFUL, DEFAULT_DELETE_ON_SUCCESSFUL),
+        Status.valueOf(document.getString(TAG_STATUS)),
+        document.getBoolean(TAG_IS_LOCK, DEFAULT_IS_LOCK));
+        
+        ObjectId id = document.getObjectId(TAG_ID);
+        if(id != null) this.ID = id.toString();
     }
 
-    public Schedule(String name, String cronExpression, String url) {
-        this.name = name;
-        this.cronExpression = cronExpression;
-        this.url = url;
+    public Schedule(String cronExpression, String url) {
+        this(cronExpression, url, DEFAULT_DELETE_ON_SUCCESSFUL, 
+                                                DEFAULT_STATUS, DEFAULT_IS_LOCK);
     }
 
-    public Schedule(String name, String cronExpression, String url, boolean deleteOnsuccessful) {
-        this.name = name;
+    public Schedule(String cronExpression, String url, boolean deleteOnsuccessful) {
+        this(cronExpression, url, deleteOnsuccessful, 
+                                                    DEFAULT_STATUS, DEFAULT_IS_LOCK);
+    }
+
+    public Schedule(String cronExpression, String url, boolean deleteOnsuccessful, 
+                                                    Status status, boolean isLock) {
         this.cronExpression = cronExpression;
         this.deleteOnsuccessful = deleteOnsuccessful;
         this.url = url;
+        this.status = status;
+        this.isLock = isLock;
+    }
+    
+    public String getID() {
+        return ID;
     }
 
-    public String getName() {
-        return name;
+    public void setID(String ID) {
+        this.ID = ID;
     }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    
     public String getCronExpression() {
         return cronExpression;
+    }
+    
+    public CronScheduleBuilder getCronExpressionBuilder() {
+        return cronSchedule(getCronExpression());
     }
 
     public void setCronExpression(String cronExpression) {
@@ -114,13 +143,31 @@ public class Schedule implements Serializable {
         this.url = url;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public boolean isLock() {
+        return isLock;
+    }
+
+    public void setLock(boolean isLock) {
+        this.isLock = isLock;
+    }
+
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 47 * hash + Objects.hashCode(this.name);
-        hash = 47 * hash + Objects.hashCode(this.cronExpression);
-        hash = 47 * hash + (this.deleteOnsuccessful ? 1 : 0);
-        hash = 47 * hash + Objects.hashCode(this.url);
+        int hash = 5;
+        hash = 23 * hash + Objects.hashCode(this.ID);
+        hash = 23 * hash + Objects.hashCode(this.cronExpression);
+        hash = 23 * hash + (this.deleteOnsuccessful ? 1 : 0);
+        hash = 23 * hash + (this.isLock ? 1 : 0);
+        hash = 23 * hash + Objects.hashCode(this.url);
+        hash = 23 * hash + Objects.hashCode(this.status);
         return hash;
     }
 
@@ -139,7 +186,10 @@ public class Schedule implements Serializable {
         if (this.deleteOnsuccessful != other.deleteOnsuccessful) {
             return false;
         }
-        if (!Objects.equals(this.name, other.name)) {
+        if (this.isLock != other.isLock) {
+            return false;
+        }
+        if (!Objects.equals(this.ID, other.ID)) {
             return false;
         }
         if (!Objects.equals(this.cronExpression, other.cronExpression)) {
@@ -148,16 +198,40 @@ public class Schedule implements Serializable {
         if (!Objects.equals(this.url, other.url)) {
             return false;
         }
+        if (this.status != other.status) {
+            return false;
+        }
         return true;
     }
     
     public JsonObject toJSON() {
         JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add(TAG_NAME, this.name);
+        builder.add(TAG_ID, this.ID);
         builder.add(TAG_CRON_EXPRESSION, this.cronExpression);
         builder.add(TAG_URL, this.url);
         builder.add(TAG_DELETE_ON_SUCCESSFUL, this.deleteOnsuccessful);
+        if(this.status != null)
+            builder.add(TAG_STATUS, this.status.toString());
+        
+        builder.add(TAG_IS_LOCK, this.isLock);
         
         return builder.build();
+    }
+    
+    /**
+     * Return a instance of Mongo's Document instance */
+    public Document toDocument() {
+        // Start with all the mandatory fields
+        Document document = new Document();
+        if(this.ID != null) 
+            document.append(TAG_ID, new ObjectId(this.ID));
+        document.append(TAG_CRON_EXPRESSION, this.cronExpression);
+        document.append(TAG_URL, this.url);
+        document.append(TAG_DELETE_ON_SUCCESSFUL, this.deleteOnsuccessful);
+        if(this.status != null)
+            document.append(TAG_STATUS, this.status.toString());
+        document.append(TAG_IS_LOCK, this.isLock);
+        
+        return document;
     }
 }

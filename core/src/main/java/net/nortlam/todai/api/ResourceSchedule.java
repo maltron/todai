@@ -17,24 +17,30 @@
  */
 package net.nortlam.todai.api;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import com.mongodb.MongoException;
+import com.mongodb.MongoWriteConcernException;
+import com.mongodb.MongoWriteException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.servlet.ServletContext;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import net.nortlam.todai.database.MongoConnection;
 import net.nortlam.todai.entity.Schedule;
+import net.nortlam.todai.exception.AlreadyExistsException;
+import net.nortlam.todai.exception.InvalidException;
 import net.nortlam.todai.exception.NoContentException;
-import net.nortlam.todai.exception.NotFoundException;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.ee.servlet.QuartzInitializerServlet;
 
 /**
  * Add some Scheduling Time
@@ -45,9 +51,6 @@ import net.nortlam.todai.exception.NotFoundException;
 public class ResourceSchedule {
 
     private static final Logger LOG = Logger.getLogger(ResourceSchedule.class.getName());
-    
-    private static final SimpleDateFormat DATE_FORMAT =
-                        new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     
     @EJB
     private ServiceSchedule service;
@@ -61,19 +64,27 @@ public class ResourceSchedule {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response findAll() throws NoContentException {
+        MongoConnection connection = (MongoConnection)
+                                    context.getAttribute(MongoConnection.NAME);
         GenericEntity<Collection<Schedule>> all = 
-                    new GenericEntity<Collection<Schedule>>(service.fetchAll()){};
+                    new GenericEntity<Collection<Schedule>>(service.fetchAll(connection)){};
         return Response.ok(all, MediaType.APPLICATION_JSON).build();
     }
     
-    @GET
-    @Path("/name/{name}")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findByName(@PathParam("name") String name) throws NotFoundException {
-        Schedule schedule = service.findByName(name);
-        return Response.ok(schedule, MediaType.APPLICATION_JSON).build();
+    public Response add(Schedule schedule) throws MongoWriteException, 
+                                MongoWriteConcernException, MongoException,
+                  InvalidException, AlreadyExistsException, SchedulerException {
+        MongoConnection connection = (MongoConnection)
+                                    context.getAttribute(MongoConnection.NAME);
+        SchedulerFactory factory = (SchedulerFactory)
+                context.getAttribute(QuartzInitializerServlet.QUARTZ_FACTORY_KEY);
+        
+        String newlySchedule = service.add(connection, factory, schedule);
+        return Response.ok(newlySchedule, MediaType.APPLICATION_JSON).build();
     }
-    
     
 //    /**
 //     * Doing a small test into creating something into Scheduler */
@@ -98,18 +109,4 @@ public class ResourceSchedule {
 //        LOG.log(Level.INFO, ">>> Operatoin.add() Returning 200 OK");
 //        return Response.ok().build();
 //    }
-    
-    private static Date nextMinute(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.setLenient(true);
-        
-        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE)+1);
-        
-        return calendar.getTime();
-    }
-    
-    private static String stringDate(Date date) {
-        return DATE_FORMAT.format(date);
-    }
 }
